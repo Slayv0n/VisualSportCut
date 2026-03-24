@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace VisualSportCut.Domain.Models
+namespace VisualSportCut.Domain
 {
     public class LabelEvent
     {

@@ -1,4 +1,4 @@
-﻿namespace VisualSportCut.Domain.Models
+﻿namespace VisualSportCut.Domain
 {
     public class Tag
     {
