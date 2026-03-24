@@ -1,23 +1,25 @@
-﻿namespace VisualSportCut.Domain
+﻿namespace VisualSportCut.Domain.Models
 {
     public class Stamp
     {
         public Stamp() { }
         public string Name { get; private set; } = null!;
-        public DateTime StartTime { get; private set; }
-        public DateTime EndTime { get; private set; }
+        public TimeSpan StartTime { get; private set; }
+        public TimeSpan EndTime { get; private set; }
         public List<TimeEvent> TimeEvents { get; private set; } = new List<TimeEvent>();
         public Tag Tag { get; private set; } = new Tag();
         public List<LabelEvent> LabelEvents { get; private set; } = new List<LabelEvent>();
 
         public static Stamp Create(string? name,
-            DateTime startTime,
-            DateTime endTime,
+            string startTime,
+            string endTime,
             List<TimeEvent> timeEvents,
             Tag tag,
             List<LabelEvent> labelEvents)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(name);
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(startTime);
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(endTime);
             ArgumentNullException.ThrowIfNull(timeEvents);
             ArgumentNullException.ThrowIfNull(tag);
             ArgumentNullException.ThrowIfNull(labelEvents);
@@ -26,8 +28,8 @@
             var stamp = new Stamp
             {
                 Name = name,
-                StartTime = startTime,
-                EndTime = endTime,
+                StartTime = TimeSpan.ParseExact(startTime, "hh\\:mm\\:ss", null),
+                EndTime = TimeSpan.ParseExact(endTime, "hh\\:mm\\:ss", null),
                 Tag = tag,
                 LabelEvents = labelEvents,
 
