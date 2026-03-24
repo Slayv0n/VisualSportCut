@@ -7,5 +7,6 @@ namespace VisualSportCut.Domain.Interfaces
         IEnumerable<StatItem> GetStatsByTag(string tagName);
         IEnumerable<StatItem> GetStatsByPeriod(string periodName);
         IEnumerable<StatItem> GetStatsByLabel(string labelType, string labelValue);
+        void SetStamps(List<Stamp> stamps);
     }
 }
