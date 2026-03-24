@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="VisualSportCut.Domain/VisualSportCut.Domain.csproj" />
+  <Project Path="VisualSportCut.Infrastructure/VisualSportCut.Infrastructure.csproj" />
   <Project Path="VisualSportCut/VisualSportCut.Presentation.csproj" />
 </Solution>

@@ -8,9 +8,6 @@
         Title="MainWindow" Height="450" Width="800"
         xmlns:vm="clr-namespace:VisualSportCut.Presentation.ViewModels"
         xmlns:wpf="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF">
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>

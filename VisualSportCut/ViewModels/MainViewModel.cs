@@ -1,7 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using VisualSportCut.Domain.Interfaces;
@@ -10,10 +15,8 @@ using VisualSportCut.Domain.Services;
 
 namespace VisualSportCut.Presentation.ViewModels
 {
-    partial class MainViewModel : ObservableObject
+    public partial class MainViewModel : ObservableObject
     {
-        public MainViewModel() { }
-
         private readonly IJsonLoader _jsonLoader;
         private readonly IStatisticService _statsService;
 
@@ -31,6 +34,12 @@ namespace VisualSportCut.Presentation.ViewModels
 
         [ObservableProperty]
         private string _statusMessage = "Загрузите JSON файл для начала работы";
+
+        [ObservableProperty]
+        private ISeries[] _chartSeries = Array.Empty<ISeries>();
+
+        [ObservableProperty]
+        private Axis[] _xAxes = Array.Empty<Axis>();
 
         public MainViewModel(IJsonLoader jsonLoader,
                              IStatisticService statsService)
@@ -83,11 +92,25 @@ namespace VisualSportCut.Presentation.ViewModels
         private void UpdateStatistics()
         {
             Statistics.Clear();
-
-            var stats =  _statsService.GetStatsByTag(SelectedTag);
+            var stats = _statsService.GetStatsByTag(SelectedTag == "Все теги" ? "" : SelectedTag);
 
             foreach (var stat in stats)
                 Statistics.Add(stat);
+
+            // Обновляем график
+            ChartSeries = Statistics.Select(s =>
+                new ColumnSeries<int>
+                {
+                    Name = s.Category,
+                    Values = new[] { s.Count },
+                    Fill = new SolidColorPaint { Color = new SKColor(byte.Parse(s.Color.Substring(0, 2), NumberStyles.HexNumber),
+                    byte.Parse(s.Color.Substring(2, 2), NumberStyles.HexNumber),
+                    byte.Parse(s.Color.Substring(4, 2), NumberStyles.HexNumber))
+                    }
+                }
+            ).ToArray();
+
+            XAxes = new[] { new Axis { Labels = Statistics.Select(s => s.Category).ToArray() } };
 
             StatusMessage = $"Показано статистики: {Statistics.Count}";
         }

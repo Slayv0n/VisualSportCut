@@ -14,8 +14,8 @@ namespace VisualSportCut.Domain.Services
 
         public IEnumerable<StatItem> GetStatsByTag(string tagName)
         => _stamps
-            .Where(s => s.Tag?.Name == tagName)
-            .GroupBy(s => s.Tag?.Group)
+            .Where(s => s.Tag.Name.Contains(tagName))
+            .GroupBy(s => s.Tag?.Name)
             .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
 
         public IEnumerable<StatItem> GetStatsByPeriod(string periodName)

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VisualSportCut.Domain\VisualSportCut.Domain.csproj" />
+    <ProjectReference Include="..\VisualSportCut.Infrastructure\VisualSportCut.Infrastructure.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

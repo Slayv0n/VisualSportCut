@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VisualSportCut.Presentation.ViewModels;
 
 namespace VisualSportCut
 {
@@ -17,9 +18,13 @@ namespace VisualSportCut
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow() : this(null) { }
+
+        // Конструктор для DI
+        public MainWindow(MainViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
         }
     }
 }
