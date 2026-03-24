@@ -12,6 +12,8 @@ namespace VisualSportCut.Presentation.ViewModels
 {
     partial class MainViewModel : ObservableObject
     {
+        public MainViewModel() { }
+
         private readonly IJsonLoader _jsonLoader;
         private readonly IStatisticService _statsService;
 

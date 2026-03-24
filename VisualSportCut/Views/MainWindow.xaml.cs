@@ -21,14 +21,5 @@ namespace VisualSportCut
         {
             InitializeComponent();
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.Win32.OpenFileDialog { Filter = "JSON files|*.json" };
-            if (dialog.ShowDialog() == true)
-            {
-                var json = File.ReadAllText(dialog.FileName);
-                Text.Text = json;
-            }
-        }
     }
 }
