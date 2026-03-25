@@ -94,13 +94,13 @@ namespace VisualSportCut.Presentation.ViewModels
                     .Distinct()
                     .Where(t => !string.IsNullOrEmpty(t)))
                 {
-                    AvailableGroups.Add(group);
+                    AvailableGroups.Add(group!);
                 }
 
                 IsDataLoaded = true;
                 SelectedTag = "Все теги";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 IsDataLoaded = false;
             }
@@ -127,8 +127,11 @@ namespace VisualSportCut.Presentation.ViewModels
                     Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
-                    MaxRadialColumnWidth = 50,
-                    Pushout = 4
+                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
+                    MaxRadialColumnWidth = 60,
+
+                    InnerRadius = 30
+
                 }
             ).ToArray();
 
@@ -139,6 +142,7 @@ namespace VisualSportCut.Presentation.ViewModels
                     Values = Statistics.Select(s => s.Count).ToArray(),
                     DataLabelsPaint = new SolidColorPaint(SKColors.White),
                     Fill = new SolidColorPaint(SKColors.Red),
+                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
                     MaxBarWidth = 60
                 }
             };

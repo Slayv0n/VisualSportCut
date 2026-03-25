@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VisualSportCut"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="VisualSportCut" MinHeight="600" MinWidth="800"
         xmlns:vm="clr-namespace:VisualSportCut.Presentation.ViewModels"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         xmlns:lvcore="clr-namespace:LiveChartsCore;assembly=LiveChartsCore">
@@ -13,83 +13,54 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="0.6*"/>
-            <RowDefinition Height="0.4*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="1.5*"/>
-        </Grid.ColumnDefinitions>
-
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
-                Orientation="Horizontal" Margin="0,0,0,20">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="📂 Загрузить JSON" 
                 Command="{Binding LoadFileCommand}"
                 Padding="15,8"/>
-            <ComboBox
-                  ItemsSource="{Binding AvailableGroups}"
+            <ComboBox ItemsSource="{Binding AvailableGroups}"
                   SelectedItem="{Binding SelectedTag}"
                   Margin="20,0,0,0"
-                  Width="200">
-            </ComboBox>
+                  Width="200"/>
         </StackPanel>
 
-        <lvc:PieChart Grid.Row="2" Grid.Column="0"
-                  Series="{Binding PieSeries}"
-                  LegendPosition="Bottom"
-                  LegendTextSize="10"
-                  LegendTextPaint="{Binding WhiteColor}"
-                  Margin="10,0,0,0">
-            <lvc:PieChart.Style>
-                <Style TargetType="lvc:PieChart">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsDataLoaded}" Value="False">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </lvc:PieChart.Style>
-        </lvc:PieChart>
+        <TabControl Grid.Row="1" 
+                Background="Transparent"
+                BorderThickness="0">
 
-        <lvc:PolarChart Grid.Row="1" Grid.Column="0"
-            Series="{Binding PolarLineSeries}"
-            AngleAxes="{Binding AngleAxes}"
-            RadiusAxes="{Binding RadialAxes}">
-            <lvc:PolarChart.Style>
-                <Style TargetType="lvc:PolarChart">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsDataLoaded}" Value="False">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </lvc:PolarChart.Style>
-        </lvc:PolarChart>
+            <TabItem Header="📊 График">
+                <lvc:CartesianChart TooltipFindingStrategy="CompareOnlyXTakeClosest"
+                                Series="{Binding СartesianSeries}"
+                                XAxes="{Binding XAxes}"
+                                YAxes="{Binding YAxes}"
+                                ZoomMode="X"/>
+            </TabItem>
 
-        <lvc:CartesianChart Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"
-            TooltipFindingStrategy="CompareOnlyXTakeClosest"
-            Series="{Binding СartesianSeries}"
-            XAxes="{Binding XAxes}"
-            YAxes="{Binding YAxes}"
-            AnimationsSpeed="00:00:00.500"
-            EasingFunction="{Binding Source={x:Static lvcore:EasingFunctions.SinIn}}"
-            ZoomMode="X"
-            Margin="0,0,10,0">
-            <lvc:CartesianChart.Style>
-                <Style TargetType="lvc:CartesianChart">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsDataLoaded}" Value="False">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </lvc:CartesianChart.Style>
-        </lvc:CartesianChart>
+            <TabItem Header="🥧 Диаграммы">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
+                    <lvc:PieChart Grid.Column="0"
+                              Series="{Binding PieSeries}"
+                              LegendPosition="Bottom"
+                              LegendTextPaint="{Binding WhiteColor}"
+                              Margin="0,0,10,0"
+                              MaxHeight="500"
+                              MaxWidth="800"/>
+
+                    <lvc:PolarChart Grid.Column="1"
+                                Series="{Binding PolarLineSeries}"
+                                AngleAxes="{Binding AngleAxes}"
+                                RadiusAxes="{Binding RadialAxes}"
+                                Margin="10,0,0,0"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
+
 </Window>
