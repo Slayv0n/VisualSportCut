@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
+using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Extensions;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
@@ -48,6 +50,9 @@ namespace VisualSportCut.Presentation.ViewModels
 
         [ObservableProperty]
         private string _statusMessage = "Загрузите JSON файл для начала работы";
+
+        [ObservableProperty]
+        private PieSeries<int>[] _pieSeries = Array.Empty<PieSeries<int>>();
 
         [ObservableProperty]
         private ISeries[] _chartSeries = Array.Empty<ISeries>();
@@ -111,7 +116,23 @@ namespace VisualSportCut.Presentation.ViewModels
             foreach (var stat in stats)
                 Statistics.Add(stat);
 
+            var pieData = Statistics.GroupBy(s => s.Category)
+            .Select(g => new { Name = g.Key, Total = g.Sum(x => x.Count), Color = g.First().Color })
+            .ToList();
 
+            PieSeries = pieData.Select(d =>
+                new PieSeries<int>
+                {
+                    Name = d.Name,
+                    Values = new[] { d.Total },
+                    Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
+                    byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
+                    byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
+
+                    MaxRadialColumnWidth = 120,
+                    Pushout = 2
+                }
+            ).ToArray();
 
             // Обновляем график
             ChartSeries = new ISeries[]

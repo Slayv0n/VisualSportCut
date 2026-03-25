@@ -15,14 +15,22 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+        <!-- ✅ Добавляем две колонки: 3* для графика, 1* для круговой -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Панель управления (на всю ширину) -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                Orientation="Horizontal" Margin="0,0,0,20">
             <Button Content="📂 Загрузить JSON" 
-                    Command="{Binding LoadFileCommand}"
-                    Padding="15,8"/>
+                Command="{Binding LoadFileCommand}"
+                Padding="15,8"/>
             <ComboBox ItemsSource="{Binding AvailableGroups}"
-                      SelectedItem="{Binding SelectedTag}"
-                      Margin="20,0,0,0"
-                      Width="200">
+                  SelectedItem="{Binding SelectedTag}"
+                  Margin="20,0,0,0"
+                  Width="200">
                 <ComboBox.Style>
                     <Style TargetType="ComboBox">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -36,11 +44,18 @@
             </ComboBox>
         </StackPanel>
 
-        <lvc:CartesianChart Grid.Row="1"
-                            TooltipFindingStrategy="CompareOnlyXTakeClosest"
-                            Series="{Binding ChartSeries}"
-                            XAxes="{Binding XAxes}"
-                            ZoomMode="X">
-        </lvc:CartesianChart>
+
+        <lvc:PieChart Grid.Row="1" Grid.Column="0"
+                  Series="{Binding PieSeries}"
+                  LegendPosition="Bottom"
+                  Margin="10,0,0,0"/>
+
+        <lvc:CartesianChart Grid.Row="1" Grid.Column="1"
+                        TooltipFindingStrategy="CompareOnlyXTakeClosest"
+                        Series="{Binding ChartSeries}"
+                        XAxes="{Binding XAxes}"
+                        ZoomMode="X"
+                        Margin="0,0,10,0"/>
+
     </Grid>
 </Window>
