@@ -12,9 +12,9 @@ namespace VisualSportCut.Domain.Services
 
         public void SetStamps(List<Stamp> stamps) => _stamps = stamps;
 
-        public IEnumerable<StatItem> GetStatsByTag(string tagName)
+        public IEnumerable<StatItem> GetStatsByGroup(string tagName)
         => _stamps
-            .Where(s => s.Tag.Name.Contains(tagName))
+            .Where(s => s.Tag.Group.Contains(tagName))
             .GroupBy(s => s.Tag?.Name)
             .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
 

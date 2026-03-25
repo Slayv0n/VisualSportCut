@@ -6,6 +6,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -17,6 +18,19 @@ namespace VisualSportCut.Presentation.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
+        public ISeries[] Series { get; set; }
+    = new ISeries[]
+    {
+                new LineSeries<int>
+                {
+                    Values = new int[] { 4, 6, 5, 3, -3, -1, 2 }
+                },
+                new ColumnSeries<double>
+                {
+                    Values = new double[] { 2, 5, 4, -2, 4, -3, 5 }
+                }
+    };
+    
         private readonly IJsonLoader _jsonLoader;
         private readonly IStatisticService _statsService;
 
@@ -24,7 +38,7 @@ namespace VisualSportCut.Presentation.ViewModels
         private ObservableCollection<StatItem> _statistics = new();
 
         [ObservableProperty]
-        private ObservableCollection<string> _availableTags = new();
+        private ObservableCollection<string> _availableGroups = new();
 
         [ObservableProperty]
         private string _selectedTag = string.Empty;
@@ -66,15 +80,15 @@ namespace VisualSportCut.Presentation.ViewModels
                 var stamps = await _jsonLoader.LoadAsync(dialog.FileName);
                 _statsService.SetStamps(stamps);
 
-                AvailableTags.Clear();
-                AvailableTags.Add("Все теги");
+                AvailableGroups.Clear();
+                AvailableGroups.Add("Все теги");
 
-                foreach (var tag in stamps
-                    .Select(s => s.Tag?.Name)
+                foreach (var group in stamps
+                    .Select(s => s.Tag?.Group)
                     .Distinct()
                     .Where(t => !string.IsNullOrEmpty(t)))
                 {
-                    AvailableTags.Add(tag);
+                    AvailableGroups.Add(group);
                 }
 
                 IsDataLoaded = true;
@@ -92,25 +106,33 @@ namespace VisualSportCut.Presentation.ViewModels
         private void UpdateStatistics()
         {
             Statistics.Clear();
-            var stats = _statsService.GetStatsByTag(SelectedTag == "Все теги" ? "" : SelectedTag);
+            var stats = _statsService.GetStatsByGroup(SelectedTag == "Все теги" ? "" : SelectedTag);
 
             foreach (var stat in stats)
                 Statistics.Add(stat);
 
+
+
             // Обновляем график
-            ChartSeries = Statistics.Select(s =>
+            ChartSeries = new ISeries[]
+            {
                 new ColumnSeries<int>
                 {
-                    Name = s.Category,
-                    Values = new[] { s.Count },
-                    Fill = new SolidColorPaint { Color = new SKColor(byte.Parse(s.Color.Substring(0, 2), NumberStyles.HexNumber),
-                    byte.Parse(s.Color.Substring(2, 2), NumberStyles.HexNumber),
-                    byte.Parse(s.Color.Substring(4, 2), NumberStyles.HexNumber))
-                    }
+                    Name = "Статистика",
+                    Values = Statistics.Select(s => s.Count).ToArray(),
+                    Fill = new SolidColorPaint(new SKColor(255, 0, 0)),
+                    MaxBarWidth = 60
                 }
-            ).ToArray();
+            };
 
-            XAxes = new[] { new Axis { Labels = Statistics.Select(s => s.Category).ToArray() } };
+            XAxes = new[]
+            {
+                new Axis
+                {
+                    Labels = Statistics.Select(s => s.Category).ToArray(),
+                    MinStep = 0
+                }
+            };
 
             StatusMessage = $"Показано статистики: {Statistics.Count}";
         }

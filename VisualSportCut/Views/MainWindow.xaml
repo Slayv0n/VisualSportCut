@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         xmlns:vm="clr-namespace:VisualSportCut.Presentation.ViewModels"
-        xmlns:wpf="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF">
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -19,7 +19,7 @@
             <Button Content="📂 Загрузить JSON" 
                     Command="{Binding LoadFileCommand}"
                     Padding="15,8"/>
-            <ComboBox ItemsSource="{Binding AvailableTags}"
+            <ComboBox ItemsSource="{Binding AvailableGroups}"
                       SelectedItem="{Binding SelectedTag}"
                       Margin="20,0,0,0"
                       Width="200">
@@ -36,9 +36,11 @@
             </ComboBox>
         </StackPanel>
 
-        <wpf:CartesianChart Grid.Row="1"
+        <lvc:CartesianChart Grid.Row="1"
+                            TooltipFindingStrategy="CompareOnlyXTakeClosest"
                             Series="{Binding ChartSeries}"
                             XAxes="{Binding XAxes}"
-                            Margin="0,10,0,0"/>
+                            ZoomMode="X">
+        </lvc:CartesianChart>
     </Grid>
 </Window>
