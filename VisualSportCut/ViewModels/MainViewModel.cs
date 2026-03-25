@@ -1,10 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
+using LiveChartsCore.Drawing;
 using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Extensions;
 using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.VisualElements;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -20,19 +23,8 @@ namespace VisualSportCut.Presentation.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-        public ISeries[] Series { get; set; }
-    = new ISeries[]
-    {
-                new LineSeries<int>
-                {
-                    Values = new int[] { 4, 6, 5, 3, -3, -1, 2 }
-                },
-                new ColumnSeries<double>
-                {
-                    Values = new double[] { 2, 5, 4, -2, 4, -3, 5 }
-                }
-    };
-    
+
+
         private readonly IJsonLoader _jsonLoader;
         private readonly IStatisticService _statsService;
 
@@ -49,16 +41,28 @@ namespace VisualSportCut.Presentation.ViewModels
         private bool _isDataLoaded = false;
 
         [ObservableProperty]
-        private string _statusMessage = "Загрузите JSON файл для начала работы";
-
-        [ObservableProperty]
         private PieSeries<int>[] _pieSeries = Array.Empty<PieSeries<int>>();
 
         [ObservableProperty]
-        private ISeries[] _chartSeries = Array.Empty<ISeries>();
+        private ISeries[] _сartesianSeries = Array.Empty<ISeries>();
+
+        [ObservableProperty]
+        private ISeries[] _polarLineSeries = Array.Empty<ISeries>();
 
         [ObservableProperty]
         private Axis[] _xAxes = Array.Empty<Axis>();
+
+        [ObservableProperty]
+        private Axis[] _yAxes = Array.Empty<Axis>();
+
+        [ObservableProperty] 
+        private PolarAxis[] _radialAxes = Array.Empty<PolarAxis>();
+
+        [ObservableProperty]
+        private PolarAxis[] _angleAxes = Array.Empty<PolarAxis>();
+
+        [ObservableProperty]
+        private SolidColorPaint _whiteColor = new SolidColorPaint(SKColors.White);
 
         public MainViewModel(IJsonLoader jsonLoader,
                              IStatisticService statsService)
@@ -72,16 +76,13 @@ namespace VisualSportCut.Presentation.ViewModels
         {
             try
             {
-                StatusMessage = "Выберите файл...";
                 var dialog = new Microsoft.Win32.OpenFileDialog { Filter = "JSON files|*.json" };
 
                 if (dialog.ShowDialog() == false)
                 {
-                    StatusMessage = "Загрузка отменена";
                     return;
                 }
 
-                StatusMessage = "Загрузка файла...";
                 var stamps = await _jsonLoader.LoadAsync(dialog.FileName);
                 _statsService.SetStamps(stamps);
 
@@ -98,11 +99,9 @@ namespace VisualSportCut.Presentation.ViewModels
 
                 IsDataLoaded = true;
                 SelectedTag = "Все теги";
-                StatusMessage = $"Файл загружен";
             }
             catch (Exception ex)
             {
-                StatusMessage = $"Ошибка: {ex.Message}";
                 IsDataLoaded = false;
             }
         }
@@ -128,21 +127,27 @@ namespace VisualSportCut.Presentation.ViewModels
                     Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
-
-                    MaxRadialColumnWidth = 120,
-                    Pushout = 2
+                    MaxRadialColumnWidth = 50,
+                    Pushout = 4
                 }
             ).ToArray();
 
-            // Обновляем график
-            ChartSeries = new ISeries[]
+            СartesianSeries = new ISeries[]
             {
                 new ColumnSeries<int>
                 {
-                    Name = "Статистика",
                     Values = Statistics.Select(s => s.Count).ToArray(),
-                    Fill = new SolidColorPaint(new SKColor(255, 0, 0)),
+                    DataLabelsPaint = new SolidColorPaint(SKColors.White),
+                    Fill = new SolidColorPaint(SKColors.Red),
                     MaxBarWidth = 60
+                }
+            };
+
+            YAxes = new[]
+            {
+                new Axis
+                {
+                    LabelsPaint = new SolidColorPaint(SKColors.White),
                 }
             };
 
@@ -151,11 +156,51 @@ namespace VisualSportCut.Presentation.ViewModels
                 new Axis
                 {
                     Labels = Statistics.Select(s => s.Category).ToArray(),
+                    LabelsPaint = new SolidColorPaint(SKColors.White),
                     MinStep = 0
                 }
             };
 
-            StatusMessage = $"Показано статистики: {Statistics.Count}";
+            PolarLineSeries = new ISeries[]
+            {
+                new PolarLineSeries<int>
+                {
+                    Values = Statistics.Select(s => s.Count).ToArray(),
+                    DataLabelsPaint = new SolidColorPaint(SKColors.Red),
+                    GeometryFill = new SolidColorPaint(SKColors.Red),
+                    GeometryStroke = new SolidColorPaint(SKColors.Black),
+                    Stroke = new SolidColorPaint(SKColors.Red),
+                    Fill = new SolidColorPaint(new SKColor(255, 0, 0, 100)),
+                    GeometrySize = 10,
+                    DataLabelsSize = 0,
+                    DataLabelsPosition = PolarLabelsPosition.Middle,
+                    DataLabelsRotation = LiveCharts.CotangentAngle,
+                    IsClosed = true
+                }
+            };
+
+            RadialAxes = new[]
+            {
+                new PolarAxis
+                {
+                    LabelsPaint = new SolidColorPaint(SKColors.White),
+                    LabelsBackground = LvcColor.Empty,
+                    SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90))
+                }
+            };
+
+            AngleAxes = new[]
+            {
+                new PolarAxis
+                {
+                    Labels = Statistics.Select(s => s.Category).ToArray(),
+                    TextSize = 10,
+                    LabelsPaint = new SolidColorPaint(SKColors.White),
+                    LabelsBackground = LvcColor.Empty,
+                    SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90)),
+                    ForceStepToMin = true
+                }
+            };
         }
 
         private bool CanRefreshStats() => IsDataLoaded;
