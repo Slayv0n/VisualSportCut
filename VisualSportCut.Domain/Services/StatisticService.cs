@@ -12,22 +12,28 @@ namespace VisualSportCut.Domain.Services
 
         public void SetStamps(List<Stamp> stamps) => _stamps = stamps;
 
-        public IEnumerable<StatItem> GetStatsByGroup(string tagName)
+        public IEnumerable<StatItem> GetStatsByGroup(string groupName)
         => _stamps
-            .Where(s => s.Tag.Group.Contains(tagName))
+            .Where(s => s.Tag.Group.Contains(groupName))
             .GroupBy(s => s.Tag?.Name)
             .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
 
+        //public IEnumerable<StatItem> GetStatsByGroupAndLabel(string groupName, string labelGroup)
+        //=> _stamps
+        //.Where(s => s.Tag.Group.Contains(groupName) && s.LabelEvents.Any(le => le.Group == labelGroup))
+        //.GroupBy(s => s.Tag?.Name)
+        //.Select(g => StatItem.Create(g.Key))
+
         public IEnumerable<StatItem> GetStatsByPeriod(string periodName)
             => _stamps
-                .Where(s => s.TimeEvents.Any(te => te.Name == periodName))
+                .Where(s => s.TimeEvents.Any(te => te.Name.Contains(periodName)))
                 .GroupBy(s => s.Tag?.Name)
                 .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
 
         public IEnumerable<StatItem> GetStatsByLabel(string labelType, string labelValue)
         => _stamps
                 .Where(s => s.LabelEvents.Any(le => le.Group == le.Group && le.Name == labelValue))
-                .GroupBy(s => s.Tag.Name) //В работе
+                .GroupBy(s => s.Tag.Name)
                 .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
     }
 }

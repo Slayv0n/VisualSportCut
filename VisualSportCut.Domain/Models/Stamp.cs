@@ -30,9 +30,9 @@
                 Name = name,
                 StartTime = TimeSpan.ParseExact(startTime, "hh\\:mm\\:ss", null),
                 EndTime = TimeSpan.ParseExact(endTime, "hh\\:mm\\:ss", null),
+                TimeEvents = timeEvents,
                 Tag = tag,
                 LabelEvents = labelEvents,
-
             };
 
             return stamp;

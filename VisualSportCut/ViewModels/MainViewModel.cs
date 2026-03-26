@@ -35,7 +35,19 @@ namespace VisualSportCut.Presentation.ViewModels
         private ObservableCollection<string> _availableGroups = new();
 
         [ObservableProperty]
-        private string _selectedTag = string.Empty;
+        private ObservableCollection<string> _availablePeriods = new();
+
+        [ObservableProperty]
+        private ObservableCollection<string> _groupByTypes = new() { "По тегам", "По периодам" };
+
+        [ObservableProperty]
+        private string _selectedGroupByType = string.Empty;
+
+        [ObservableProperty]
+        private string _selectedTagGroup = string.Empty;
+
+        [ObservableProperty]
+        private string _selectedPeriod = string.Empty;
 
         [ObservableProperty]
         private bool _isDataLoaded = false;
@@ -97,8 +109,24 @@ namespace VisualSportCut.Presentation.ViewModels
                     AvailableGroups.Add(group!);
                 }
 
+                AvailablePeriods.Clear();
+                AvailablePeriods.Add("Все периоды");
+
+                var periods = new ObservableCollection<string>(
+                    stamps.SelectMany(s => s.TimeEvents)
+                          .Select(p => p.Name!)
+                          .Distinct()
+                );
+
+                foreach (var period in periods)
+                {
+                    AvailablePeriods.Add(period);
+                }
+
                 IsDataLoaded = true;
-                SelectedTag = "Все теги";
+                SelectedGroupByType = "По тегам";
+                SelectedTagGroup = "Все теги";
+                SelectedPeriod = "Все периоды";
             }
             catch (Exception)
             {
@@ -110,7 +138,17 @@ namespace VisualSportCut.Presentation.ViewModels
         private void UpdateStatistics()
         {
             Statistics.Clear();
-            var stats = _statsService.GetStatsByGroup(SelectedTag == "Все теги" ? "" : SelectedTag);
+
+            IEnumerable<StatItem> stats = Array.Empty<StatItem>();
+
+            if (SelectedGroupByType == "По тегам")
+            {
+                stats = _statsService.GetStatsByGroup(SelectedTagGroup == "Все теги" ? "" : SelectedTagGroup);
+            }
+            else if (SelectedGroupByType == "По периодам")
+            {
+                stats = _statsService.GetStatsByPeriod(SelectedPeriod == "Все периоды" ? "" : SelectedPeriod);
+            }
 
             foreach (var stat in stats)
                 Statistics.Add(stat);
@@ -128,8 +166,13 @@ namespace VisualSportCut.Presentation.ViewModels
                     byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
                     Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
+                    ToolTipLabelFormatter = point =>
+                    {
+                        var total = pieData.Sum(d => d.Total);
+                        var percent = (double)point.Model / total;
+                        return $"{d.Total} - {percent.ToString("P2")}";
+                    },
                     MaxRadialColumnWidth = 60,
-
                     InnerRadius = 30
 
                 }
@@ -198,7 +241,7 @@ namespace VisualSportCut.Presentation.ViewModels
                 new PolarAxis
                 {
                     Labels = Statistics.Select(s => s.Category).ToArray(),
-                    TextSize = 10,
+                    TextSize = 14,
                     LabelsPaint = new SolidColorPaint(SKColors.White),
                     LabelsBackground = LvcColor.Empty,
                     SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90)),
@@ -209,10 +252,23 @@ namespace VisualSportCut.Presentation.ViewModels
 
         private bool CanRefreshStats() => IsDataLoaded;
 
-        partial void OnSelectedTagChanged(string value)
+        partial void OnSelectedTagGroupChanged(string value)
         {
             if (IsDataLoaded)
                 UpdateStatistics();
+        }
+        partial void OnSelectedPeriodChanged(string value)
+        {
+            if (IsDataLoaded)
+                UpdateStatistics();
+        }
+        partial void OnSelectedGroupByTypeChanged(string value)
+        {
+            SelectedTagGroup = "Все теги";
+            SelectedPeriod = "Все периоды";
+            if (IsDataLoaded)
+                UpdateStatistics();
+
         }
     }
 }

@@ -24,11 +24,14 @@
 
         <Style TargetType="TabItem">
             <Setter Property="Foreground" Value="{StaticResource ForegroundText}"/>
+            <Setter Property="Visibility" Value="Visible"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Width" Value="96"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
                         <Border x:Name="Border"
-                        Background="{StaticResource BackgroundButton}"
+                        Background="{StaticResource PressElement}"
                         
                         Padding="{TemplateBinding Padding}"
                         CornerRadius="4,4,0,0">
@@ -45,14 +48,19 @@
                             </Trigger>
 
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource PressElement}"/>
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundButton}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDataLoaded}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
-        
+
         <Style TargetType="Button">
             <Setter Property="Background" Value="{StaticResource BackgroundButton}"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundText}"/>
@@ -82,12 +90,13 @@
             </Setter>
         </Style>
 
-        <Style TargetType="ComboBox">
+        <Style x:Key="ComboBox.Base" TargetType="ComboBox">
             <Setter Property="Background" Value="{StaticResource BackgroundButton}"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundText}"/>
             <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="20, 0, 0, 0"/>
+            <Setter Property="Width" Value="150"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Visibility" Value="Visible"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -138,7 +147,7 @@
                                       IsHitTestVisible="False"
                                       TextElement.Foreground="{TemplateBinding Foreground}"/>
 
-                           <Popup x:Name="PART_Popup" Width="200"
+                            <Popup x:Name="PART_Popup" Width="200"
                            AllowsTransparency="True"
                            IsOpen="{TemplateBinding IsDropDownOpen}"
                            Placement="Bottom"
@@ -172,6 +181,7 @@
             </Style.Triggers>
         </Style>
 
+        
         <Style TargetType="ComboBoxItem">
             <Setter Property="Background" Value="{StaticResource BackgroundButton}"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundText}"/>
@@ -198,5 +208,22 @@
             </Setter>
         </Style>
 
+        <Style x:Key="ComboBox.VisibleForTags" TargetType="ComboBox" BasedOn="{StaticResource ComboBox.Base}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedGroupByType}" Value="По тегам">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ComboBox.VisibleForPeriods" TargetType="ComboBox" BasedOn="{StaticResource ComboBox.Base}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedGroupByType}" Value="По периодам">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Application.Resources>
 </Application>
