@@ -30,10 +30,10 @@ namespace VisualSportCut.Domain.Services
                 .GroupBy(s => s.Tag?.Name)
                 .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
 
-        public IEnumerable<StatItem> GetStatsByLabel(string labelType, string labelValue)
+        public IEnumerable<StatItem> GetStatsByLabel(string labelGroup, string labelName)
         => _stamps
-                .Where(s => s.LabelEvents.Any(le => le.Group == le.Group && le.Name == labelValue))
-                .GroupBy(s => s.Tag.Name)
+                .Where(s => s.LabelEvents.Any(le => le.Group.Contains(labelGroup) && le.Name.Contains(labelName)))
+                .GroupBy(s => s.Tag?.Name)
                 .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
     }
 }

@@ -8,6 +8,7 @@
         <SolidColorBrush x:Key="Background" Color="#000000"/>
         <SolidColorBrush x:Key="HoverElement" Color="#444444"/>
         <SolidColorBrush x:Key="PressElement" Color="#222222"/>
+        <SolidColorBrush x:Key="ScrollColor" Color="#666666"/>
 
         <Style TargetType="Window">
             <Setter Property="Background" Value="{StaticResource Background}"/>
@@ -90,6 +91,54 @@
             </Setter>
         </Style>
 
+        <Style TargetType="ScrollBar">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid>
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <!-- ✅ DecreaseRepeatButton без анимации -->
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineUpCommand">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Background="{StaticResource PressElement}" 
+                                                BorderThickness="0"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+
+                                <Track.Thumb>
+                                    <Thumb>
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{StaticResource ScrollColor}"
+                                                BorderThickness="0"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+
+                                <!-- ✅ IncreaseRepeatButton без анимации -->
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineDownCommand">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Background="{StaticResource PressElement}" 
+                                                BorderThickness="0"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ComboBox.Base" TargetType="ComboBox">
             <Setter Property="Background" Value="{StaticResource BackgroundButton}"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundText}"/>
@@ -154,7 +203,7 @@
                            PopupAnimation="Slide"
                            Focusable="False">
                                 <Border x:Name="DropDownBorder"
-                                Background="#333333"
+                                Background="{StaticResource BackgroundButton}"
                                 BorderBrush="Transparent"
                                 BorderThickness="0"
                                 CornerRadius="4">
@@ -185,7 +234,9 @@
         <Style TargetType="ComboBoxItem">
             <Setter Property="Background" Value="{StaticResource BackgroundButton}"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundText}"/>
-            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="Padding" Value="8, 5"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Height" Value="28"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
@@ -221,6 +272,15 @@
             <Setter Property="Visibility" Value="Collapsed"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedGroupByType}" Value="По периодам">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ComboBox.VisibleForLabels" TargetType="ComboBox" BasedOn="{StaticResource ComboBox.Base}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedGroupByType}" Value="По лейблам">
                     <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </Style.Triggers>

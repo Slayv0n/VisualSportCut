@@ -4,9 +4,9 @@ namespace VisualSportCut.Domain.Interfaces
 {
     public interface IStatisticService
     {
-        IEnumerable<StatItem> GetStatsByGroup(string tagName);
+        IEnumerable<StatItem> GetStatsByGroup(string tagGroupName);
         IEnumerable<StatItem> GetStatsByPeriod(string periodName);
-        IEnumerable<StatItem> GetStatsByLabel(string labelType, string labelValue);
+        IEnumerable<StatItem> GetStatsByLabel(string labelGroup, string labelName);
         void SetStamps(List<Stamp> stamps);
     }
 }

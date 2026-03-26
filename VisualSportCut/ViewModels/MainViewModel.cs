@@ -2,29 +2,19 @@
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.Drawing;
-using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Extensions;
 using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView.VisualElements;
 using SkiaSharp;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using VisualSportCut.Domain.Interfaces;
 using VisualSportCut.Domain.Models;
-using VisualSportCut.Domain.Services;
+
 
 namespace VisualSportCut.Presentation.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-
-
         private readonly IJsonLoader _jsonLoader;
         private readonly IStatisticService _statsService;
 
@@ -38,7 +28,10 @@ namespace VisualSportCut.Presentation.ViewModels
         private ObservableCollection<string> _availablePeriods = new();
 
         [ObservableProperty]
-        private ObservableCollection<string> _groupByTypes = new() { "По тегам", "По периодам" };
+        private ObservableCollection<string> _availableLabels = new();
+
+        [ObservableProperty]
+        private ObservableCollection<string> _groupByTypes = new() { "По тегам", "По периодам", "По лейблам" };
 
         [ObservableProperty]
         private string _selectedGroupByType = string.Empty;
@@ -48,6 +41,9 @@ namespace VisualSportCut.Presentation.ViewModels
 
         [ObservableProperty]
         private string _selectedPeriod = string.Empty;
+
+        [ObservableProperty]
+        private string _selectedLabel = string.Empty;
 
         [ObservableProperty]
         private bool _isDataLoaded = false;
@@ -123,10 +119,25 @@ namespace VisualSportCut.Presentation.ViewModels
                     AvailablePeriods.Add(period);
                 }
 
+                AvailableLabels.Clear();
+                AvailableLabels.Add("Все лейблы");
+
+                var labels = new ObservableCollection<string>(
+                    stamps.SelectMany(s => s.LabelEvents)
+                          .Select(le => $"{le.Group} - {le.Name}")
+                          .Distinct()
+                );
+
+                foreach (var label in labels)
+                {
+                    AvailableLabels.Add(label);
+                }
+
                 IsDataLoaded = true;
                 SelectedGroupByType = "По тегам";
                 SelectedTagGroup = "Все теги";
                 SelectedPeriod = "Все периоды";
+                SelectedLabel = "Все лейблы";
             }
             catch (Exception)
             {
@@ -149,6 +160,12 @@ namespace VisualSportCut.Presentation.ViewModels
             {
                 stats = _statsService.GetStatsByPeriod(SelectedPeriod == "Все периоды" ? "" : SelectedPeriod);
             }
+            else if (SelectedGroupByType == "По лейблам")
+            {
+                var labelGroup = SelectedLabel == "Все лейблы" ? "" : SelectedLabel?.Split(' ').FirstOrDefault();
+                var labelName = SelectedLabel == "Все лейблы" ? "" : SelectedLabel?.Substring(SelectedLabel.LastIndexOf(' ') + 1);
+                stats = _statsService.GetStatsByLabel(labelGroup ?? "", labelName ?? "");
+            }
 
             foreach (var stat in stats)
                 Statistics.Add(stat);
@@ -165,7 +182,8 @@ namespace VisualSportCut.Presentation.ViewModels
                     Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
-                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
+                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.5f},
+                    Pushout = 2,
                     ToolTipLabelFormatter = point =>
                     {
                         var total = pieData.Sum(d => d.Total);
@@ -262,10 +280,16 @@ namespace VisualSportCut.Presentation.ViewModels
             if (IsDataLoaded)
                 UpdateStatistics();
         }
+        partial void OnSelectedLabelChanged(string value)
+        {
+            if (IsDataLoaded)
+                UpdateStatistics();
+        }
         partial void OnSelectedGroupByTypeChanged(string value)
         {
             SelectedTagGroup = "Все теги";
             SelectedPeriod = "Все периоды";
+            SelectedLabel = "Все лейблы";
             if (IsDataLoaded)
                 UpdateStatistics();
 

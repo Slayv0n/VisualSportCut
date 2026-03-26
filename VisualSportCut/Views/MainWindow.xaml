@@ -28,10 +28,13 @@
               SelectedItem="{Binding SelectedTagGroup}"
               Style="{StaticResource ComboBox.VisibleForTags}"/>
 
-            
             <ComboBox ItemsSource="{Binding AvailablePeriods}"
               SelectedItem="{Binding SelectedPeriod}"
               Style="{StaticResource ComboBox.VisibleForPeriods}"/>
+
+            <ComboBox ItemsSource="{Binding AvailableLabels}"
+              SelectedItem="{Binding SelectedLabel}"
+              Style="{StaticResource ComboBox.VisibleForLabels}"/>
         </StackPanel>
 
         <TabControl Grid.Row="1" 
