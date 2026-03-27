@@ -72,6 +72,9 @@ namespace VisualSportCut.Presentation.ViewModels
         [ObservableProperty]
         private SolidColorPaint _whiteColor = new SolidColorPaint(SKColors.White);
 
+        [ObservableProperty]
+        private SolidColorPaint _backgroundColor = new SolidColorPaint(new SKColor(31, 31, 31));
+
         public MainViewModel(IJsonLoader jsonLoader,
                              IStatisticService statsService)
         {
@@ -182,8 +185,7 @@ namespace VisualSportCut.Presentation.ViewModels
                     Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
                     byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
-                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.5f},
-                    Pushout = 2,
+                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
                     ToolTipLabelFormatter = point =>
                     {
                         var total = pieData.Sum(d => d.Total);
@@ -191,7 +193,9 @@ namespace VisualSportCut.Presentation.ViewModels
                         return $"{d.Total} - {percent.ToString("P2")}";
                     },
                     MaxRadialColumnWidth = 60,
-                    InnerRadius = 30
+                    InnerRadius = 30,
+                    Pushout = 4,
+                    HoverPushout = 12
 
                 }
             ).ToArray();
@@ -203,7 +207,6 @@ namespace VisualSportCut.Presentation.ViewModels
                     Values = Statistics.Select(s => s.Count).ToArray(),
                     DataLabelsPaint = new SolidColorPaint(SKColors.White),
                     Fill = new SolidColorPaint(SKColors.Red),
-                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
                     MaxBarWidth = 60
                 }
             };
@@ -248,7 +251,7 @@ namespace VisualSportCut.Presentation.ViewModels
             {
                 new PolarAxis
                 {
-                    LabelsPaint = new SolidColorPaint(SKColors.White),
+                    LabelsPaint = new SolidColorPaint(SKColors.Transparent),
                     LabelsBackground = LvcColor.Empty,
                     SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90))
                 }
@@ -263,7 +266,6 @@ namespace VisualSportCut.Presentation.ViewModels
                     LabelsPaint = new SolidColorPaint(SKColors.White),
                     LabelsBackground = LvcColor.Empty,
                     SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90)),
-                    ForceStepToMin = true
                 }
             };
         }

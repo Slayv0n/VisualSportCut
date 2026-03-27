@@ -68,6 +68,10 @@ namespace VisualSportCut.Infrastructure.Services
                 labelEvents.Add(LabelEvent.Create(labelEventElement.GetProperty("name").GetString(),
                     labelEventElement.GetProperty("group").GetProperty("name").GetString()));
             }
+            if (labelEvents.Count == 0)
+            {
+                labelEvents.Add(LabelEvent.Create("Без названия", "Без группы"));
+            }
             return labelEvents;
         }
 
