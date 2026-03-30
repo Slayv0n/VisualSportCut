@@ -18,12 +18,6 @@ namespace VisualSportCut.Domain.Services
             .GroupBy(s => s.Tag?.Name)
             .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
 
-        //public IEnumerable<StatItem> GetStatsByGroupAndLabel(string groupName, string labelGroup)
-        //=> _stamps
-        //.Where(s => s.Tag.Group.Contains(groupName) && s.LabelEvents.Any(le => le.Group == labelGroup))
-        //.GroupBy(s => s.Tag?.Name)
-        //.Select(g => StatItem.Create(g.Key))
-
         public IEnumerable<StatItem> GetStatsByPeriod(string periodName)
             => _stamps
                 .Where(s => s.TimeEvents.Any(te => te.Name.Contains(periodName)))
@@ -35,5 +29,16 @@ namespace VisualSportCut.Domain.Services
                 .Where(s => s.LabelEvents.Any(le => le.Group.Contains(labelGroup) && le.Name.Contains(labelName)))
                 .GroupBy(s => s.Tag?.Name)
                 .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
+
+        public IEnumerable<StatItem> GetStatsByTime(double startTime, double endTime)
+        {
+            var start = TimeSpan.FromMinutes(startTime);
+            var end = TimeSpan.FromMinutes(endTime);
+
+            return _stamps
+                .Where(s => s.StartTime >= start && s.EndTime <= end)
+                .GroupBy(s => s.Tag?.Name)
+                .Select(g => StatItem.Create(g.Key!, g.Count(), g.First().Tag.Color));
+        }
     }
 }

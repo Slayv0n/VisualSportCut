@@ -7,6 +7,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
+using System.Windows;
 using VisualSportCut.Domain.Interfaces;
 using VisualSportCut.Domain.Models;
 
@@ -31,19 +32,34 @@ namespace VisualSportCut.Presentation.ViewModels
         private ObservableCollection<string> _availableLabels = new();
 
         [ObservableProperty]
-        private ObservableCollection<string> _groupByTypes = new() { "По тегам", "По периодам", "По лейблам" };
+        private ObservableCollection<string> _groupByTypes = new() { "По тегам", "По периодам", "По лейблам", "По времени" };
 
         [ObservableProperty]
         private string _selectedGroupByType = string.Empty;
 
         [ObservableProperty]
-        private string _selectedTagGroup = string.Empty;
+        private string _selectedTagGroup = "Все теги";
 
         [ObservableProperty]
-        private string _selectedPeriod = string.Empty;
+        private string _selectedPeriod = "Все периоды";
 
         [ObservableProperty]
-        private string _selectedLabel = string.Empty;
+        private string _selectedLabel = "Все лейблы";
+
+        [ObservableProperty]
+        private double _startTimeValue = 0;
+
+        [ObservableProperty]
+        private double _endTimeValue;
+
+        [ObservableProperty]
+        private double _maxMinutes = 100;
+
+        [ObservableProperty]
+        private string _startTimeDisplay = "00:00:00";
+
+        [ObservableProperty]
+        private string _endTimeDisplay = "23:59:59";
 
         [ObservableProperty]
         private bool _isDataLoaded = false;
@@ -136,11 +152,14 @@ namespace VisualSportCut.Presentation.ViewModels
                     AvailableLabels.Add(label);
                 }
 
+                var matchStart = stamps.Min(s => s.StartTime);
+                var matchEnd = stamps.Max(s => s.EndTime);
+
+                MaxMinutes = Math.Ceiling(matchEnd.TotalMinutes);
+
                 IsDataLoaded = true;
                 SelectedGroupByType = "По тегам";
-                SelectedTagGroup = "Все теги";
-                SelectedPeriod = "Все периоды";
-                SelectedLabel = "Все лейблы";
+                EndTimeValue = MaxMinutes;
             }
             catch (Exception)
             {
@@ -151,123 +170,133 @@ namespace VisualSportCut.Presentation.ViewModels
         [RelayCommand(CanExecute = nameof(CanRefreshStats))]
         private void UpdateStatistics()
         {
-            Statistics.Clear();
-
-            IEnumerable<StatItem> stats = Array.Empty<StatItem>();
-
-            if (SelectedGroupByType == "По тегам")
+            try
             {
-                stats = _statsService.GetStatsByGroup(SelectedTagGroup == "Все теги" ? "" : SelectedTagGroup);
-            }
-            else if (SelectedGroupByType == "По периодам")
-            {
-                stats = _statsService.GetStatsByPeriod(SelectedPeriod == "Все периоды" ? "" : SelectedPeriod);
-            }
-            else if (SelectedGroupByType == "По лейблам")
-            {
-                var labelGroup = SelectedLabel == "Все лейблы" ? "" : SelectedLabel?.Split(' ').FirstOrDefault();
-                var labelName = SelectedLabel == "Все лейблы" ? "" : SelectedLabel?.Substring(SelectedLabel.LastIndexOf(' ') + 1);
-                stats = _statsService.GetStatsByLabel(labelGroup ?? "", labelName ?? "");
-            }
+                Statistics.Clear();
 
-            foreach (var stat in stats)
-                Statistics.Add(stat);
+                IEnumerable<StatItem> stats = Array.Empty<StatItem>();
 
-            var pieData = Statistics.GroupBy(s => s.Category)
-            .Select(g => new { Name = g.Key, Total = g.Sum(x => x.Count), Color = g.First().Color })
-            .ToList();
-
-            PieSeries = pieData.Select(d =>
-                new PieSeries<int>
+                switch (SelectedGroupByType)
                 {
-                    Name = d.Name,
-                    Values = new[] { d.Total },
-                    Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
-                    byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
-                    byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
-                    Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f},
-                    ToolTipLabelFormatter = point =>
+                    case "По тегам":
+                        stats = _statsService.GetStatsByGroup(SelectedTagGroup == "Все теги" ? "" : SelectedTagGroup);
+                        break;
+                    case "По периодам":
+                        stats = _statsService.GetStatsByPeriod(SelectedPeriod == "Все периоды" ? "" : SelectedPeriod);
+                        break;
+                    case "По лейблам":
+                        var labelGroup = SelectedLabel == "Все лейблы" ? "" : SelectedLabel?.Split(' ').FirstOrDefault();
+                        var labelName = SelectedLabel == "Все лейблы" ? "" : SelectedLabel?.Substring(SelectedLabel.LastIndexOf(' ') + 1);
+                        stats = _statsService.GetStatsByLabel(labelGroup ?? "", labelName ?? "");
+                        break;
+                    case "По времени":
+                        stats = _statsService.GetStatsByTime(StartTimeValue, EndTimeValue);
+                        break;
+                }
+
+                foreach (var stat in stats)
+                    Statistics.Add(stat);
+
+                var pieData = Statistics.GroupBy(s => s.Category)
+                .Select(g => new { Name = g.Key, Total = g.Sum(x => x.Count), Color = g.First().Color })
+                .ToList();
+
+                PieSeries = pieData.Select(d =>
+                    new PieSeries<int>
                     {
-                        var total = pieData.Sum(d => d.Total);
-                        var percent = (double)point.Model / total;
-                        return $"{d.Total} - {percent.ToString("P2")}";
-                    },
-                    MaxRadialColumnWidth = 60,
-                    InnerRadius = 30,
-                    Pushout = 4,
-                    HoverPushout = 12
+                        Name = d.Name,
+                        Values = new[] { d.Total },
+                        Fill = new SolidColorPaint(new SKColor(byte.Parse(d.Color.Substring(0, 2), System.Globalization.NumberStyles.HexNumber),
+                        byte.Parse(d.Color.Substring(2, 2), System.Globalization.NumberStyles.HexNumber),
+                        byte.Parse(d.Color.Substring(4, 2), System.Globalization.NumberStyles.HexNumber))),
+                        Stroke = new SolidColorPaint(SKColors.White) { StrokeThickness = 0.25f },
+                        ToolTipLabelFormatter = point =>
+                        {
+                            var total = pieData.Sum(d => d.Total);
+                            var percent = (double)point.Model / total;
+                            return $"{d.Total} - {percent.ToString("P2")}";
+                        },
+                        MaxRadialColumnWidth = 60,
+                        InnerRadius = 30,
+                        Pushout = 4,
+                        HoverPushout = 12
 
-                }
-            ).ToArray();
+                    }
+                ).ToArray();
 
-            СartesianSeries = new ISeries[]
-            {
-                new ColumnSeries<int>
+                СartesianSeries = new ISeries[]
                 {
-                    Values = Statistics.Select(s => s.Count).ToArray(),
-                    DataLabelsPaint = new SolidColorPaint(SKColors.White),
-                    Fill = new SolidColorPaint(SKColors.Red),
-                    MaxBarWidth = 60
-                }
-            };
+                    new ColumnSeries<int>
+                    {
+                        Values = Statistics.Select(s => s.Count).ToArray(),
+                        DataLabelsPaint = new SolidColorPaint(SKColors.White),
+                        Fill = new SolidColorPaint(SKColors.Red),
+                        MaxBarWidth = 60
+                    }
+                };
 
-            YAxes = new[]
-            {
-                new Axis
+                YAxes = new[]
                 {
-                    LabelsPaint = new SolidColorPaint(SKColors.White),
-                }
-            };
+                    new Axis
+                    {
+                        LabelsPaint = new SolidColorPaint(SKColors.White),
+                    }
+                };
 
-            XAxes = new[]
-            {
-                new Axis
+                XAxes = new[]
                 {
-                    Labels = Statistics.Select(s => s.Category).ToArray(),
-                    LabelsPaint = new SolidColorPaint(SKColors.White),
-                    MinStep = 0
-                }
-            };
+                    new Axis
+                    {
+                        Labels = Statistics.Select(s => s.Category).ToArray(),
+                        LabelsPaint = new SolidColorPaint(SKColors.White),
+                        MinStep = 0
+                    }
+                };
 
-            PolarLineSeries = new ISeries[]
-            {
-                new PolarLineSeries<int>
+                PolarLineSeries = new ISeries[]
                 {
-                    Values = Statistics.Select(s => s.Count).ToArray(),
-                    DataLabelsPaint = new SolidColorPaint(SKColors.Red),
-                    GeometryFill = new SolidColorPaint(SKColors.Red),
-                    GeometryStroke = new SolidColorPaint(SKColors.Black),
-                    Stroke = new SolidColorPaint(SKColors.Red),
-                    Fill = new SolidColorPaint(new SKColor(255, 0, 0, 100)),
-                    GeometrySize = 10,
-                    DataLabelsSize = 0,
-                    DataLabelsPosition = PolarLabelsPosition.Middle,
-                    DataLabelsRotation = LiveCharts.CotangentAngle,
-                    IsClosed = true
-                }
-            };
+                    new PolarLineSeries<int>
+                    {
+                        Values = Statistics.Select(s => s.Count).ToArray(),
+                        DataLabelsPaint = new SolidColorPaint(SKColors.Red),
+                        GeometryFill = new SolidColorPaint(SKColors.Red),
+                        GeometryStroke = new SolidColorPaint(SKColors.Black),
+                        Stroke = new SolidColorPaint(SKColors.Red),
+                        Fill = new SolidColorPaint(new SKColor(255, 0, 0, 100)),
+                        GeometrySize = 10,
+                        DataLabelsSize = 0,
+                        DataLabelsPosition = PolarLabelsPosition.Middle,
+                        DataLabelsRotation = LiveCharts.CotangentAngle,
+                        IsClosed = true
+                    }
+                };
 
-            RadialAxes = new[]
-            {
-                new PolarAxis
+                RadialAxes = new[]
                 {
-                    LabelsPaint = new SolidColorPaint(SKColors.Transparent),
-                    LabelsBackground = LvcColor.Empty,
-                    SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90))
-                }
-            };
+                    new PolarAxis
+                    {
+                        LabelsPaint = new SolidColorPaint(SKColors.Transparent),
+                        LabelsBackground = LvcColor.Empty,
+                        SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90))
+                    }
+                };
 
-            AngleAxes = new[]
-            {
-                new PolarAxis
+                AngleAxes = new[]
                 {
-                    Labels = Statistics.Select(s => s.Category).ToArray(),
-                    TextSize = 14,
-                    LabelsPaint = new SolidColorPaint(SKColors.White),
-                    LabelsBackground = LvcColor.Empty,
-                    SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90)),
-                }
-            };
+                    new PolarAxis
+                    {
+                        Labels = Statistics.Select(s => s.Category).ToArray(),
+                        TextSize = 14,
+                        LabelsPaint = new SolidColorPaint(SKColors.White),
+                        LabelsBackground = LvcColor.Empty,
+                        SeparatorsPaint = new SolidColorPaint(new SKColor(90, 90, 90)),
+                    }
+                };
+            } catch(Exception ex)
+            {
+                MessageBox.Show($"{ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private bool CanRefreshStats() => IsDataLoaded;
@@ -292,9 +321,31 @@ namespace VisualSportCut.Presentation.ViewModels
             SelectedTagGroup = "Все теги";
             SelectedPeriod = "Все периоды";
             SelectedLabel = "Все лейблы";
+            StartTimeValue = 0;
+            EndTimeValue = MaxMinutes;
             if (IsDataLoaded)
                 UpdateStatistics();
+        }
 
+        partial void OnStartTimeValueChanged(double value)
+        {
+            if (value > EndTimeValue) StartTimeValue = EndTimeValue;
+            UpdateTimeDisplay();
+        }
+
+        partial void OnEndTimeValueChanged(double value)
+        {
+            if (value < StartTimeValue) EndTimeValue = StartTimeValue;
+            UpdateTimeDisplay();
+        }
+
+        private void UpdateTimeDisplay()
+        {
+            var start = TimeSpan.FromMinutes(StartTimeValue);
+            var end = TimeSpan.FromMinutes(EndTimeValue);
+
+            StartTimeDisplay = start.ToString(@"hh\:mm\:ss");
+            EndTimeDisplay = end.ToString(@"hh\:mm\:ss");
         }
     }
 }

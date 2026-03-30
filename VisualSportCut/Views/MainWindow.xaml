@@ -8,8 +8,9 @@
         Title="Статистика" Background="{StaticResource Background}"
         MinHeight="600" MinWidth="800" Icon="pack://application:,,,/Assets/SportCut.ico" 
         xmlns:vm="clr-namespace:VisualSportCut.Presentation.ViewModels"
+        xmlns:behaviors="clr-namespace:VisualSportCut.Presentation.Behaviors"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
-        xmlns:lvcore="clr-namespace:LiveChartsCore;assembly=LiveChartsCore" d:DataContext="{d:DesignInstance Type=vm:MainViewModel}">
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -36,7 +37,43 @@
             <ComboBox ItemsSource="{Binding AvailableLabels}"
               SelectedItem="{Binding SelectedLabel}"
               Style="{StaticResource ComboBox.VisibleForLabels}"/>
+
+            <Border Padding="15, 0" Style="{StaticResource Border.VisibleForTimes}">
+
+
+                <Border MaxHeight="32"
+    Background="{StaticResource BackgroundButton}"
+    Padding="4"
+    CornerRadius="4">
+
+                    <Grid Background="{StaticResource BackgroundButton}" MinWidth="320">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"  Style="{StaticResource TextBlock.Time}"
+                   Text="{Binding StartTimeDisplay}"
+                                   Margin="4, 0, 16, 0"/>
+
+                        <xctk:RangeSlider Grid.Column="1"
+                            Minimum="0"
+                            Maximum="{Binding MaxMinutes}"
+                            LowerValue="{Binding StartTimeValue, UpdateSourceTrigger=PropertyChanged}"
+                            HigherValue="{Binding EndTimeValue, UpdateSourceTrigger=PropertyChanged}"
+                            behaviors:RangeSliderMouseUpBehavior.MouseUpCommand="{Binding UpdateStatisticsCommand}"
+                            behaviors:RangeSliderKeyUpBehavior.KeyUpCommand="{Binding UpdateStatisticsCommand}"/>                              
+
+                            <TextBlock Grid.Column="2"  Style="{StaticResource TextBlock.Time}"
+                   Text="{Binding EndTimeDisplay}"
+                   HorizontalAlignment="Right"
+                                       Margin="16, 0, 4, 0"/>
+                        </Grid>
+                </Border>
+            </Border>
             
+
         </StackPanel>
 
         <TabControl Grid.Row="1" 
