@@ -1,0 +1,121 @@
+﻿<Window x:Class="VisualSportCut.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VisualSportCut"
+        mc:Ignorable="d"
+        Title="Статистика" Background="{StaticResource Background}"
+        MinHeight="600" MinWidth="800" Icon="pack://application:,,,/Assets/SportCut.ico" 
+        xmlns:vm="clr-namespace:VisualSportCut.Presentation.ViewModels"
+        xmlns:behaviors="clr-namespace:VisualSportCut.Presentation.Behaviors"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="📂 Загрузить JSON" 
+                Command="{Binding LoadFileCommand}"
+                Padding="15,8"/>
+            <ComboBox ItemsSource="{Binding GroupByTypes}"
+              SelectedItem="{Binding SelectedGroupByType}"
+              Style="{StaticResource ComboBox.Base}"/>
+
+            <ComboBox ItemsSource="{Binding AvailableGroups}"
+              SelectedItem="{Binding SelectedTagGroup}"
+              Style="{StaticResource ComboBox.VisibleForTags}"/>
+
+            <ComboBox ItemsSource="{Binding AvailablePeriods}"
+              SelectedItem="{Binding SelectedPeriod}"
+              Style="{StaticResource ComboBox.VisibleForPeriods}"/>
+
+            <ComboBox ItemsSource="{Binding AvailableLabels}"
+              SelectedItem="{Binding SelectedLabel}"
+              Style="{StaticResource ComboBox.VisibleForLabels}"/>
+
+            <Border Padding="15, 0" Style="{StaticResource Border.VisibleForTimes}">
+
+
+                <Border MaxHeight="32"
+    Background="{StaticResource BackgroundButton}"
+    Padding="4"
+    CornerRadius="4">
+
+                    <Grid Background="{StaticResource BackgroundButton}" MinWidth="320">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"  Style="{StaticResource TextBlock.Time}"
+                   Text="{Binding StartTimeDisplay}"
+                                   Margin="4, 0, 16, 0"/>
+
+                        <xctk:RangeSlider Grid.Column="1"
+                            Minimum="0"
+                            Maximum="{Binding MaxMinutes}"
+                            LowerValue="{Binding StartTimeValue, UpdateSourceTrigger=PropertyChanged}"
+                            HigherValue="{Binding EndTimeValue, UpdateSourceTrigger=PropertyChanged}"
+                            behaviors:RangeSliderMouseUpBehavior.MouseUpCommand="{Binding UpdateStatisticsCommand}"
+                            behaviors:RangeSliderKeyUpBehavior.KeyUpCommand="{Binding UpdateStatisticsCommand}"/>                              
+
+                            <TextBlock Grid.Column="2"  Style="{StaticResource TextBlock.Time}"
+                   Text="{Binding EndTimeDisplay}"
+                   HorizontalAlignment="Right"
+                                       Margin="16, 0, 4, 0"/>
+                        </Grid>
+                </Border>
+            </Border>
+            
+
+        </StackPanel>
+
+        <TabControl Grid.Row="1" 
+                Background="Transparent"
+                BorderThickness="0">
+
+            <TabItem Header="📊 График">
+                <Border Style="{StaticResource BorderBox}">
+                    <lvc:CartesianChart TooltipFindingStrategy="CompareOnlyXTakeClosest"
+                                Series="{Binding СartesianSeries}"
+                                XAxes="{Binding XAxes}"
+                                YAxes="{Binding YAxes}"
+                                ZoomMode="X"/>
+                </Border>
+            </TabItem>
+
+            <TabItem Header="🥧 Диаграммы">
+                <Border Style="{StaticResource BorderBox}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+   
+                    <lvc:PieChart Grid.Column="0"
+                              Series="{Binding PieSeries}"
+                              LegendPosition="Bottom"
+                              LegendTextSize="14"
+                              LegendTextPaint="{Binding WhiteColor}"
+                              Margin="0,0,10,0"
+                              MaxHeight="500"
+                              MaxWidth="800"/>
+
+                    <lvc:PolarChart Grid.Column="1"
+                                Series="{Binding PolarLineSeries}"
+                                AngleAxes="{Binding AngleAxes}"
+                                RadiusAxes="{Binding RadialAxes}"
+                                Margin="10,0,0,0"/>
+                </Grid>
+                </Border>
+            </TabItem>
+        </TabControl>
+    </Grid>
+
+</Window>
