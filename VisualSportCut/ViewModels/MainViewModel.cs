@@ -217,8 +217,7 @@ namespace VisualSportCut.Presentation.ViewModels
                             return $"{d.Total} - {percent.ToString("P2")}";
                         },
                         MaxRadialColumnWidth = 60,
-                        InnerRadius = 30,
-                        Pushout = 4,
+                        Pushout = 2,
                         HoverPushout = 12
 
                     }
