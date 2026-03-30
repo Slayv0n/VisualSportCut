@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using VisualSportCut.Domain.Interfaces;
+﻿using VisualSportCut.Domain.Interfaces;
 using VisualSportCut.Domain.Models;
 
 namespace VisualSportCut.Domain.Services

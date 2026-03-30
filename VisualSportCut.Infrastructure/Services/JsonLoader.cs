@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using VisualSportCut.Domain.Interfaces;
 using VisualSportCut.Domain.Models;
 

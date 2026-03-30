@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VisualSportCut.Domain.Models
+﻿namespace VisualSportCut.Domain.Models
 {
     public class StatItem
     {
