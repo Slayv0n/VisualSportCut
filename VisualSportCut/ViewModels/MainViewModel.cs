@@ -38,13 +38,13 @@ namespace VisualSportCut.Presentation.ViewModels
         private string _selectedGroupByType = string.Empty;
 
         [ObservableProperty]
-        private string _selectedTagGroup = "Все теги";
+        private string _selectedTagGroup = string.Empty;
 
         [ObservableProperty]
-        private string _selectedPeriod = "Все периоды";
+        private string _selectedPeriod = string.Empty;
 
         [ObservableProperty]
-        private string _selectedLabel = "Все лейблы";
+        private string _selectedLabel = string.Empty;
 
         [ObservableProperty]
         private double _startTimeValue = 0;
@@ -110,6 +110,8 @@ namespace VisualSportCut.Presentation.ViewModels
                     return;
                 }
 
+                IsDataLoaded = false;
+
                 var stamps = await _jsonLoader.LoadAsync(dialog.FileName);
                 _statsService.SetStamps(stamps);
 
@@ -159,6 +161,9 @@ namespace VisualSportCut.Presentation.ViewModels
 
                 IsDataLoaded = true;
                 SelectedGroupByType = "По тегам";
+                SelectedTagGroup = "Все теги";
+                SelectedPeriod = "Все периоды";
+                SelectedLabel = "Все лейблы";
                 EndTimeValue = MaxMinutes;
             }
             catch (Exception)
